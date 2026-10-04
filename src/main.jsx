@@ -93,7 +93,11 @@ function Root() {
   const [session, setSession] = useState(() => {
     try {
       const stored = JSON.parse(window.localStorage.getItem(SESSION_KEY) || "null");
-      return stored && stored.expiresAt > Date.now() ? stored : null;
+      const token = window.localStorage.getItem("biosecure-token");
+      if (stored && token && stored.expiresAt > Date.now()) return stored;
+      window.localStorage.removeItem(SESSION_KEY);
+      window.localStorage.removeItem("biosecure-token");
+      return null;
     } catch { return null; }
   });
   const [language, setLanguage] = useState(() => window.localStorage.getItem("biosecure-language") || "en");
@@ -119,13 +123,14 @@ function Root() {
   if (!session) {
     return (
       <App
-        onMongoLogin={(role, user) => {
+        onMongoLogin={(role, user, token) => {
           const nextSession = {
             role: ROLE_MAP[role] || "Farmer",
             user: user || null,
             createdAt: Date.now(),
             expiresAt: Date.now() + SESSION_TTL,
           };
+          if (token) window.localStorage.setItem("biosecure-token", token);
           window.localStorage.setItem(SESSION_KEY, JSON.stringify(nextSession));
           setSession(nextSession);
         }}
@@ -140,6 +145,7 @@ function Root() {
         mongoRole={session.role}
         onLogout={() => {
           window.localStorage.removeItem(SESSION_KEY);
+          window.localStorage.removeItem("biosecure-token");
           setSession(null);
         }}
         language={language}

@@ -820,7 +820,7 @@ function LoginScreen({ onLogin, onRegister, language, onLanguageChange }) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Login failed"); return; }
       const ROLE_MAP = { "Farmer": "farmer", "Veterinarian": "veterinarian", "Government Officer": "government", "Admin": "admin" };
-      onLogin(ROLE_MAP[data.user.role] || "farmer", data.user);
+      onLogin(ROLE_MAP[data.user.role] || "farmer", data.user, data.token);
     } catch (e) { setError("Cannot connect to server"); }
     finally { setLoading(false); }
   };
@@ -850,7 +850,7 @@ function LoginScreen({ onLogin, onRegister, language, onLanguageChange }) {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Google login failed"); return; }
       const ROLE_MAP = { "Farmer": "farmer", "Veterinarian": "veterinarian", "Government Officer": "government", "Admin": "admin" };
-      onLogin(ROLE_MAP[data.user.role] || "farmer", data.user);
+      onLogin(ROLE_MAP[data.user.role] || "farmer", data.user, data.token);
     } catch (e) { setError(e.message || "Google Sign-In failed"); }
   };
   return /* @__PURE__ */ jsxs("div", { className: "min-h-screen flex", style: { background: P.ivory, fontFamily: "Inter" }, children: [
@@ -1054,7 +1054,7 @@ function RegisterScreen({ onBack, onSuccess, language, onLanguageChange }) {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Registration failed"); return; }
-      onSuccess(data.user);
+      onSuccess(data.user, data.token);
     } catch (e) { setError("Cannot connect to server"); }
     finally { setLoading(false); }
   };

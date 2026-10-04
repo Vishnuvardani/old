@@ -495,7 +495,7 @@ export default function GISOutbreakMapModule() {
       setFarms(Array.isArray(f) ? f : []);
       setOutbreaks(enrichOutbreaks(Array.isArray(o) ? o : []));
     } catch (e) {
-      setError("Failed to load map data. Ensure the server is running.");
+      setError(e.message || "Failed to load map data. Ensure the server is running.");
       setFarms([]); setOutbreaks([]);
     } finally { setLoading(false); }
   }, []);

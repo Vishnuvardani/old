@@ -5,20 +5,27 @@
 
 const BASE = "http://localhost:5000/api";
 
+function authHeaders() {
+  const token = window.localStorage.getItem("biosecure-token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 async function get(path) {
-  const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
-  return res.json();
+  const res = await fetch(`${BASE}${path}`, { headers: authHeaders() });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.message || `API error ${res.status}: ${path}`);
+  return body;
 }
 
 async function post(path, body) {
   const res = await fetch(`${BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
-  return res.json();
+  const responseBody = await res.json();
+  if (!res.ok) throw new Error(responseBody.message || `API error ${res.status}: ${path}`);
+  return responseBody;
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -101,9 +108,9 @@ export const updateDiseaseStatus    = (id, data) => put(`/disease/${id}/status`,
 export const updateDiseaseInspection= (id, data) => put(`/disease/${id}/inspection`, data);
 
 // ── GIS Outbreak ──────────────────────────────────────────────────────────
-export const getGISFarms     = ()   => get("/gis/farms");
-export const getGISOutbreaks = ()   => get("/gis/outbreaks");
-export const getNearbyFarms  = (id) => get(`/gis/nearby-farms/${id}`);
+export const getGISFarms     = async () => (await get("/gis/farms")).data;
+export const getGISOutbreaks = async () => (await get("/gis/outbreaks")).data;
+export const getNearbyFarms  = (id) => get(`/gis/nearby-farms/${encodeURIComponent(id)}`);
 
 // ── Notifications (new) ───────────────────────────────────────────────────
 export const getMyNotifications  = ()   => get("/notifications");
